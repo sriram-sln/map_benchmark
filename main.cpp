@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
     timespec ts_monotonic_start;
     timespec ts_monotonic_end;
 
-    flat_hash_map_wrapper<number_type, obj_type, n_capacity> map;
+    flat_ordered_map_wrapper<number_type, obj_type, n_capacity> map;
     for (size_t epoch_no = 0; epoch_no < 20; epoch_no++) {
         /* Measure time taken to do several batch inserts and batch deletes from the map */
         std::cout << "Epoch: " << epoch_no << '\n';
