@@ -8,7 +8,7 @@
 
 #define seed_num 1234
 
-#define n_elems 10'000
+#define n_elems 1'000
 #define max_num 100'000
 #define n_capacity 4096
 
@@ -17,8 +17,8 @@
 
 using number_type = uint64_t;
 
-// using obj_type = std::array<char, obj_size>;
-using obj_type = uint64_t;
+using obj_type = std::array<char, obj_size>;
+// using obj_type = uint64_t;
 
 static size_t pos_insert = 0;
 static size_t pos_delete = 0;
@@ -37,7 +37,8 @@ bool y;
 /* flat_rbtree_map_wrapper */
 /* btree_ordered_map_wrapper */
 
-flat_rbtree_map_wrapper<number_type, obj_type, n_capacity>* map_global_ptr;
+c_hashmap_wrapper<number_type, obj_type, n_capacity>* map_global_ptr;
+// unordered_map_wrapper<number_type, obj_type, n_capacity>* map_global_ptr;
 
 void batch_insert(auto& map_impl, const std::array<number_type, n_elems>& keys, const std::array<obj_type, n_elems>& values, size_t n) {
     for (size_t i = pos_insert; i < pos_insert + n; i++) {
@@ -45,6 +46,7 @@ void batch_insert(auto& map_impl, const std::array<number_type, n_elems>& keys, 
         // map_impl.insert(keys[i % n_elems], obj_type());
     }
     pos_insert += n;
+    usleep(1000);
 }
 
 void batch_remove(auto& map_impl, const std::array<number_type, n_elems>& v, size_t n) {
@@ -104,12 +106,12 @@ int main(int argc, char* argv[]) {
     /* Construct values */
     std::array<obj_type, n_elems> values;
     for (size_t i = 0; i < n_elems; i++) {
-        // values[i] = obj_type();
-        // for (size_t j = 0; j < obj_size; j++) {
-        //     values[i][j] = 65 + (rand() % 26);
-        //     // std::cout << values[i][j];
-        // }
-        values[i] = keys[i];
+        values[i] = obj_type();
+        for (size_t j = 0; j < obj_size; j++) {
+             values[i][j] = 65 + (rand() % 26);
+             // std::cout << values[i][j];
+        }
+        // values[i] = keys[i];
     }
 
     std::ofstream output_chars;
@@ -124,7 +126,7 @@ int main(int argc, char* argv[]) {
 
     std::remove_pointer_t<decltype(map_global_ptr)> map;
     map_global_ptr = &map;
-    for (size_t epoch_no = 0; epoch_no < 20; epoch_no++) {
+    for (size_t epoch_no = 0; epoch_no < 5; epoch_no++) {
 
         /* 2MB object - 64B * 32768 */
         std::array<special_char, 32768> random_data;
@@ -135,7 +137,7 @@ int main(int argc, char* argv[]) {
         std::int64_t time_taken = 0;
         /* Measure time taken to do several batch inserts and batch deletes from the map */
         std::cout << "Epoch: " << epoch_no << '\n';
-        for (size_t i = 0; i < 300'000; i++) {        
+        for (size_t i = 0; i < 10'000; i++) {        
             /* One out of every 100 repetitions should insert 3000 elements */
             /* Remaining should insert 20 and delete 10 */
             clock_gettime(CLOCK_MONOTONIC, &ts_monotonic_start);
@@ -158,17 +160,17 @@ int main(int argc, char* argv[]) {
             clock_gettime(CLOCK_MONOTONIC, &ts_monotonic_end);
             time_taken = (std::int64_t)(ts_monotonic_end.tv_sec - ts_monotonic_start.tv_sec) * 1e9 + (ts_monotonic_end.tv_nsec - ts_monotonic_start.tv_nsec);
             
-            // res << epoch_no << "," << time_taken << '\n';
-            // for (size_t i = 0; i < 32768; i++) {
-            //     tsum += random_data[i].v;
-            //     random_data[i].v += (map.map_internal.size() % 2 == 0);
-            // }
+            res << epoch_no << "," << time_taken << '\n';
+            for (size_t i = 0; i < 32768; i++) {
+                 tsum += random_data[i].v;
+                 random_data[i].v += (map.map_internal.size() % 2 == 0);
+            }
             /* Large data structure - 64 byte aligned - read one byte every 64 bytes and add to sum - refresh the data per epoch */
             // batch_insert(map, keys, values, 100);
         }
-        for (auto it = map.map_internal.begin(); it != map.map_internal.end(); ++it) {
-            assert(map.map_internal[it->first] == it->first);
-        }
+        // for (auto it = map.map_internal.begin(); it != map.map_internal.end(); ++it) {
+        //    assert(map.map_internal[it->first] == it->first);
+        // }
         /* Cast to int64 before multiplication */
         // std::uint64_t time_taken = (ts_monotonic_end.tv_sec - ts_monotonic_start.tv_sec) * 1e9 + (ts_monotonic_end.tv_nsec - ts_monotonic_start.tv_nsec);
         
@@ -177,7 +179,7 @@ int main(int argc, char* argv[]) {
             // std::cout << it->first;
             for (size_t i = 0; i < 50; i++) {
                 size_t num = rand() % obj_size;
-                // output_chars << it->first << tsum << map.map_internal[it->first][num];
+                output_chars << it->first << tsum << map.map_internal[it->first][num];
                 // std::cout << it->second[i];
             }
         }

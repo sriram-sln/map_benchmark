@@ -11,12 +11,12 @@ project(map_benchmark)
 # Abseil requires C++14
 set(CMAKE_CXX_STANDARD 20)
 
-# add_compile_options(-O3)
-add_compile_options(-g)
+add_compile_options(-O3)
+# add_compile_options(-g)
 
 # Process Abseil's CMake build system
 add_subdirectory(thirdparty/abseil-cpp)
-add_subdirectory(thirdparty/Flat-Map-RB-Tree)
+#add_subdirectory(thirdparty/Flat-Map-RB-Tree)
 
 add_executable(main main.cpp)
 target_include_directories(main PUBLIC thirdparty/boost_1_82_0)

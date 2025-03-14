@@ -2,10 +2,11 @@
 #include <map>
 #include <queue>
 #include <unordered_map>
+#include "custom_map/c_hashmap.h"
 #include <absl/container/flat_hash_map.h>
 #include <absl/container/btree_map.h>
-#include <boost/container/pmr/flat_map.hpp>
-#include "../Flat-Map-RB-Tree/include/dro/flat-rb-tree.hpp"
+//#include <boost/container/pmr/flat_map.hpp>
+//#include "../Flat-Map-RB-Tree/include/dro/flat-rb-tree.hpp"
 
 static auto global_memory_resource = std::pmr::unsynchronized_pool_resource({100'000, 512});
 
@@ -79,6 +80,56 @@ struct unordered_map_wrapper : public map_base<unordered_map_wrapper<U, V, CAPAC
         return map_internal.find(key) != map_internal.end();
     }
 };
+
+template<typename U, typename V, size_t CAPACITY>
+struct c_hashmap_wrapper : public map_base<c_hashmap_wrapper<U, V, CAPACITY>, U, V, CAPACITY>
+{
+    c_hashmap<U, V> map_internal;
+    U largest = 0;
+
+    void insert(const U& key, const V& value) {
+        if (map_internal.size() == CAPACITY) {
+            /* Decide whether to insert */
+            if (key < largest) {
+                map_internal.emplace(key, value);
+                this->remove(largest);
+            }
+            
+        } else {
+            map_internal.emplace(key, value);
+            this->largest = std::max(this->largest, key);
+        }
+    }
+
+    void remove(const U& key) {
+        auto it = map_internal.find(key);
+        if (it != map_internal.end()) {
+            map_internal.remove(key);
+            if (key == this->largest) {
+                this->largest = 0;
+                if (map_internal.size() != 0) {
+                    for (auto it = map_internal.begin(); it != map_internal.end(); ++it) {
+                        this->largest = std::max(this->largest, it->first);
+                    }
+                }
+            }
+        }
+
+    }
+
+    void insert_no_rule(const U& key, const V& value) {
+        map_internal.emplace(key, value);
+    }
+
+    void clear() {
+        map_internal.clear();
+    }
+
+    bool find(const U& key) const {
+        return map_internal.find(key) != map_internal.end();
+    }
+};
+
 
 template<typename U, typename V, size_t CAPACITY>
 struct flat_hash_map_wrapper : public map_base<flat_hash_map_wrapper<U, V, CAPACITY>, U, V, CAPACITY>
@@ -170,6 +221,7 @@ struct ordered_map_wrapper : public map_base<ordered_map_wrapper<U, V, CAPACITY>
 };
 
 /* Erase takes significantly longer than in std::map */
+/*
 template<typename U, typename V, size_t CAPACITY>
 struct flat_ordered_map_wrapper : public map_base<flat_ordered_map_wrapper<U, V, CAPACITY>, U, V, CAPACITY>
 {
@@ -207,7 +259,7 @@ struct flat_ordered_map_wrapper : public map_base<flat_ordered_map_wrapper<U, V,
         return map_internal.find(key) != map_internal.end();
     }
 };
-
+*/
 template<typename U, typename V, size_t CAPACITY>
 struct btree_ordered_map_wrapper : public map_base<btree_ordered_map_wrapper<U, V, CAPACITY>, U, V, CAPACITY>
 {
@@ -247,6 +299,7 @@ struct btree_ordered_map_wrapper : public map_base<btree_ordered_map_wrapper<U, 
 };
 
 /* Missing PMR and reverse iterator */
+/*
 template<typename U, typename V, size_t CAPACITY>
 struct flat_rbtree_map_wrapper : public map_base<flat_rbtree_map_wrapper<U, V, CAPACITY>, U, V, CAPACITY>
 {
@@ -303,3 +356,4 @@ struct flat_rbtree_map_wrapper : public map_base<flat_rbtree_map_wrapper<U, V, C
         return map_internal.find(key) != map_internal.end();
     }
 };
+*/
