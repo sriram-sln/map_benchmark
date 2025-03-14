@@ -2,6 +2,7 @@
 #include <map>
 #include <queue>
 #include <unordered_map>
+#include <memory_resource>
 #include "custom_map/c_hashmap.h"
 #include <absl/container/flat_hash_map.h>
 #include <absl/container/btree_map.h>
@@ -81,11 +82,18 @@ struct unordered_map_wrapper : public map_base<unordered_map_wrapper<U, V, CAPAC
     }
 };
 
-template<typename U, typename V, size_t CAPACITY>
+// using alloc_type = std::pmr::polymorphic_allocator<std::pair<U, V>>;
+
+template<typename U, typename V, size_t CAPACITY, typename Allocator=std::pmr::polymorphic_allocator<std::pair<const U, V>>>
 struct c_hashmap_wrapper : public map_base<c_hashmap_wrapper<U, V, CAPACITY>, U, V, CAPACITY>
 {
-    c_hashmap<U, V> map_internal;
+
+    c_hashmap<U, V, std::hash<U>, std::equal_to<U>, Allocator> map_internal;
     U largest = 0;
+
+    c_hashmap_wrapper(Allocator allocator=std::pmr::polymorphic_allocator<std::pair<const U, V>>(&global_memory_resource)) : map_internal(allocator) {
+
+    }
 
     void insert(const U& key, const V& value) {
         if (map_internal.size() == CAPACITY) {
