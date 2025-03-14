@@ -1,5 +1,6 @@
 #include <memory>
 #include <iostream>
+#include <cstring>
 
 #define c_hash_factor 1000
 
