@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <memory_resource>
 #include "custom_map/c_hashmap.h"
+#include "custom_map/c_flatmap.h"
 #include <absl/container/flat_hash_map.h>
 #include <absl/container/btree_map.h>
 //#include <boost/container/pmr/flat_map.hpp>
@@ -113,6 +114,61 @@ struct c_hashmap_wrapper : public map_base<c_hashmap_wrapper<U, V, CAPACITY>, U,
         auto it = map_internal.find(key);
         if (it != map_internal.end()) {
             map_internal.remove(key);
+            if (key == this->largest) {
+                this->largest = 0;
+                if (map_internal.size() != 0) {
+                    for (auto it = map_internal.begin(); it != map_internal.end(); ++it) {
+                        this->largest = std::max(this->largest, it->first);
+                    }
+                }
+            }
+        }
+
+    }
+
+    void insert_no_rule(const U& key, const V& value) {
+        map_internal.emplace(key, value);
+    }
+
+    void clear() {
+        map_internal.clear();
+    }
+
+    bool find(const U& key) const {
+        return map_internal.find(key) != map_internal.end();
+    }
+};
+
+
+template<typename U, typename V, size_t CAPACITY, typename Allocator=std::pmr::polymorphic_allocator<std::pair<const U, V>>>
+struct c_flatmap_wrapper : public map_base<c_flatmap_wrapper<U, V, CAPACITY>, U, V, CAPACITY>
+{
+
+    c_flatmap<U, V, std::hash<U>, std::equal_to<U>, Allocator> map_internal;
+    U largest = 0;
+
+    c_flatmap_wrapper(Allocator allocator=std::pmr::polymorphic_allocator<std::pair<const U, V>>(&global_memory_resource)) : map_internal(allocator) {
+
+    }
+
+    void insert(const U& key, const V& value) {
+        if (map_internal.size() == CAPACITY) {
+            /* Decide whether to insert */
+            if (key < largest) {
+                map_internal.emplace(key, value);
+                this->remove(largest);
+            }
+            
+        } else {
+            map_internal.emplace(key, value);
+            this->largest = std::max(this->largest, key);
+        }
+    }
+
+    void remove(const U& key) {
+        auto it = map_internal.find(key);
+        if (it != map_internal.end()) {
+            map_internal.erase(key);
             if (key == this->largest) {
                 this->largest = 0;
                 if (map_internal.size() != 0) {
