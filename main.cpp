@@ -15,6 +15,8 @@
 /* 64B, 512B, 1KB, 2KB, 4KB object - random data - generate objects prior to profiling */
 #define obj_size 64
 
+#define N_EPOCHS 10;
+
 using number_type = uint64_t;
 
 using obj_type = std::array<char, obj_size>;
@@ -130,7 +132,7 @@ int main(int argc, char* argv[]) {
 
     std::remove_pointer_t<decltype(map_global_ptr)> map;
     map_global_ptr = &map;
-    for (size_t epoch_no = 0; epoch_no < 5; epoch_no++) {
+    for (size_t epoch_no = 0; epoch_no < N_EPOCHS; epoch_no++) {
 
         /* 2MB object - 64B * 32768 */
         std::array<special_char, 32768> random_data;
