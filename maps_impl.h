@@ -7,6 +7,7 @@
 #include "custom_map/c_flatmap.h"
 #include <absl/container/flat_hash_map.h>
 #include <absl/container/btree_map.h>
+#include "custom_allocators/fixed_allocator.h"
 //#include <boost/container/pmr/flat_map.hpp>
 //#include "../Flat-Map-RB-Tree/include/dro/flat-rb-tree.hpp"
 
@@ -37,7 +38,8 @@ struct map_base
 template<typename U, typename V, size_t CAPACITY>
 struct unordered_map_wrapper : public map_base<unordered_map_wrapper<U, V, CAPACITY>, U, V, CAPACITY>
 {
-    std::pmr::unordered_map<U, V> map_internal;
+    // std::pmr::unordered_map<U, V> map_internal;
+    std::unordered_map<U, V, std::hash<U>, std::equal_to<U>, fixed_allocator_t<std::pair<const U, V>, CAPACITY * 2>> map_internal;
     U largest = 0;
 
     void insert(const U& key, const V& value) {

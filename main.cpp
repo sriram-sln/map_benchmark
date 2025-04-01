@@ -40,8 +40,8 @@ bool y;
 // std::pmr::polymorphic_allocator<std::pair<number_type, obj_type>> pmr_alloc(&global_memory_resource);
 
 // c_hashmap_wrapper<number_type, obj_type, n_capacity>* map_global_ptr;
-// unordered_map_wrapper<number_type, obj_type, n_capacity>* map_global_ptr;
-c_flatmap_wrapper<number_type, obj_type, n_capacity>* map_global_ptr;
+unordered_map_wrapper<number_type, obj_type, n_capacity>* map_global_ptr;
+// c_flatmap_wrapper<number_type, obj_type, n_capacity>* map_global_ptr;
 // flat_hash_map_wrapper<number_type, obj_type, n_capacity>* map_global_ptr;
 
 void batch_insert(auto& map_impl, const std::array<number_type, n_elems>& keys, const std::array<obj_type, n_elems>& values, size_t n) {
