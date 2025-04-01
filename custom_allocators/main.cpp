@@ -38,5 +38,8 @@ int main() {
 
     foo(std::move(m));
 
+    // fixed_allocator_t<int, 10> p;
+    // fixed_allocator_t<int*, 10> v(p);
+
     return 0;
 }

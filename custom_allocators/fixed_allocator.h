@@ -63,6 +63,9 @@ struct fixed_allocator_t {
 
     fixed_allocator_t() {}
 
+    template<typename Alloc_Other>
+    fixed_allocator_t(Alloc_Other) {}
+
     T* allocate(size_t n) {
         if constexpr (!std::is_pointer_v<T>){
             assert(n == 1);
