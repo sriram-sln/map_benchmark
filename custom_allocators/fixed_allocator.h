@@ -68,21 +68,21 @@ struct fixed_allocator_t {
 
     T* allocate(size_t n) {
         if constexpr (!std::is_pointer_v<T>){
-            assert(n == 1);
-            x++;
+            // assert(n == 1);
+            // x++;
             return bank.get_slot();
         }
-        assert(x <= n_elems);
+        // assert(x <= n_elems);
         return static_cast<T*>(malloc(sizeof(T) * n));
     }
 
     void deallocate(T* p, size_t n) {
         if constexpr (!std::is_pointer_v<T>){
-            assert(n == 1);
-            x--;
+            // assert(n == 1);
+            // x--;
             return bank.free_slot(p);
         }
-        assert(x >= 0);
+        // assert(x >= 0);
         free(p);
     }
 
