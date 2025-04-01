@@ -15,7 +15,7 @@
 /* 64B, 512B, 1KB, 2KB, 4KB object - random data - generate objects prior to profiling */
 #define obj_size 64
 
-#define N_EPOCHS 10;
+#define N_EPOCHS 10
 
 using number_type = uint64_t;
 
